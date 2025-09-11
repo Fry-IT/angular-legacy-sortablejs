@@ -95,6 +95,58 @@
 							});
 						}
 
+            function _withPrevItem(evt, item) {
+              evt.preventDefault();
+              var prev = item.previousElementSibling;
+              if (prev) {
+                item.parentNode.insertBefore(item, prev);
+                evt.target.focus();
+              }
+            }
+
+            function _withNextItem(evt, item) {
+              var next = item.nextElementSibling;
+              if (next) {
+                item.parentNode.insertBefore(next, item);
+                evt.target.focus();
+              }
+            }
+
+            function _onKeyDown(evt) {
+              var item = evt.target.closest(el.children[0].tagName);
+              if (item) {
+                evt.oldIndex = Array.prototype.indexOf.call(item.parentNode.children, item);
+              }
+
+              var direction = sortable.options.direction || 'vertical';
+
+              if (direction === 'vertical') {
+                if (evt.key === 'ArrowUp' || evt.keyCode === 38) {
+                  _withPrevItem(evt, item);
+                }
+
+                if (evt.key === 'ArrowDown' || evt.keyCode === 40) {
+                  _withNextItem(evt, item);
+                }
+              }
+
+              if (direction === 'horizontal') {
+                if (evt.key === 'ArrowLeft' || evt.keyCode === 37) {
+                  _withPrevItem(evt, item);
+                }
+
+                if (evt.key === 'ArrowRight' || evt.keyCode === 39) {
+                  _withNextItem(evt, item);
+                }
+              }
+
+              if (item) {
+                evt.newIndex = Array.prototype.indexOf.call(item.parentNode.children, item);
+              }
+
+              _emitEvent(evt);
+              scope.$apply();
+            }
 
 						function _sync(/**Event*/evt) {
 							var items = getSource();
@@ -185,13 +237,17 @@
 							},
 							onSort: function (/**Event*/evt) {
 								_emitEvent(evt);
-							}
+							},
 						}));
+
+            el.addEventListener('keydown', function(evt) {
+              _onKeyDown.call(sortable, evt);
+            });
 
 						// Create watchers for `options`
 						angular.forEach([
 							'sort', 'disabled', 'draggable', 'handle', 'animation', 'group', 'ghostClass', 'filter',
-							'onStart', 'onEnd', 'onAdd', 'onUpdate', 'onRemove', 'onSort', 'onMove', 'onClone', 'setData',
+							'onStart', 'onEnd', 'onAdd', 'onUpdate', 'onRemove', 'onSort', 'onMove', 'onClone', 'onKeyDown', 'setData',
 							'delay', 'animation', 'forceFallback'
 						], function (name) {
 							watchers.push(scope.$watch('ngSortable.' + name, function (value) {
