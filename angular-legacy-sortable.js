@@ -113,12 +113,12 @@
             }
 
             function _onKeyDown(evt) {
-              var item = evt.target.closest(el.children[0].tagName);
+              var item = Sortable.utils.closest(evt.target, options.draggable, el, false);
               if (item) {
                 evt.oldIndex = Array.prototype.indexOf.call(item.parentNode.children, item);
               }
 
-              var direction = sortable.options.direction || 'vertical';
+              var direction = options.direction || 'vertical';
 
               if (direction === 'vertical') {
                 if (evt.key === 'ArrowUp' || evt.keyCode === 38) {
