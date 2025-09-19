@@ -95,57 +95,52 @@
 							});
 						}
 
-            function _withPrevItem(evt, item) {
-              evt.preventDefault();
-              var prev = item.previousElementSibling;
-              if (prev) {
-                item.parentNode.insertBefore(item, prev);
-                evt.target.focus();
-              }
-            }
-
-            function _withNextItem(evt, item) {
-              var next = item.nextElementSibling;
-              if (next) {
-                item.parentNode.insertBefore(next, item);
-                evt.target.focus();
-              }
-            }
-
             function _onKeyDown(evt) {
-              var item = Sortable.utils.closest(evt.target, options.draggable, el, false);
-              if (item) {
-                evt.oldIndex = Array.prototype.indexOf.call(item.parentNode.children, item);
+              var item = evt.target.closest(el.children[0].tagName);
+              if (!item) return;
+
+              var allItems = Array.prototype.slice.call(el.children); // all repeated children
+              var oldIndex = allItems.indexOf(item.closest('[ng-repeat], [data-ng-repeat], [x-ng-repeat], [dir-paginate]'));
+
+              var newIndex = oldIndex;
+
+              if (evt.key === 'ArrowUp' || evt.keyCode === 38) {
+                evt.preventDefault();
+                newIndex = oldIndex - 1;
               }
 
-              var direction = options.direction || 'vertical';
-
-              if (direction === 'vertical') {
-                if (evt.key === 'ArrowUp' || evt.keyCode === 38) {
-                  _withPrevItem(evt, item);
-                }
-
-                if (evt.key === 'ArrowDown' || evt.keyCode === 40) {
-                  _withNextItem(evt, item);
-                }
+              if (evt.key === 'ArrowDown' || evt.keyCode === 40) {
+                evt.preventDefault();
+                newIndex = oldIndex + 1;
               }
 
-              if (direction === 'horizontal') {
-                if (evt.key === 'ArrowLeft' || evt.keyCode === 37) {
-                  _withPrevItem(evt, item);
-                }
+              var items = getSource();
+              if (!items) return;
 
-                if (evt.key === 'ArrowRight' || evt.keyCode === 39) {
-                  _withNextItem(evt, item);
-                }
+              if (newIndex !== oldIndex && newIndex >= 0 && newIndex < items.length) {
+                scope.$apply(function() {
+                  var moved = items.splice(oldIndex, 1)[0];
+                  items.splice(newIndex, 0, moved);
+                });
+
+                var sortableEvt = {
+                  type: 'update',
+                  item: item,
+                  from: el,
+                  to: el,
+                  oldIndex: oldIndex,
+                  newIndex: newIndex,
+                  target: evt.target,
+                  originalEvent: evt
+                };
+
+                _emitEvent(sortableEvt);
+
+                // Restore focus after digest
+                scope.$evalAsync(function() {
+                  evt.target.focus();
+                });
               }
-
-              if (item) {
-                evt.newIndex = Array.prototype.indexOf.call(item.parentNode.children, item);
-              }
-
-              _emitEvent(evt);
-              scope.$apply();
             }
 
 						function _sync(/**Event*/evt) {
@@ -188,8 +183,6 @@
 									evt.from.insertBefore(nextSibling, evt.item.nextSibling);
 								}
 							}
-
-							scope.$apply();
 						}
 
 						function _destroy() {
