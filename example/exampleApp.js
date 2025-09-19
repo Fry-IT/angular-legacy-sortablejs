@@ -11,7 +11,6 @@ angular.module('exampleApp', ['ng-sortable'])
       this.items = ['burgers', 'chips', 'hotdog', 'icecream']
       this.sortableConf = {
         handle: '.drag-handle',
-        draggable: 'li',
         forceFallback: true,
         onStart: this.onStart,
         onMove: this.onMove,

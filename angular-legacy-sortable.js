@@ -104,14 +104,30 @@
 
               var newIndex = oldIndex;
 
-              if (evt.key === 'ArrowUp' || evt.keyCode === 38) {
-                evt.preventDefault();
-                newIndex = oldIndex - 1;
+              var direction = options.direction || 'vertical';
+
+              if (direction === 'vertical') {
+                if (evt.key === 'ArrowUp' || evt.keyCode === 38) {
+                  evt.preventDefault();
+                  newIndex = oldIndex - 1;
+                }
+
+                if (evt.key === 'ArrowDown' || evt.keyCode === 40) {
+                  evt.preventDefault();
+                  newIndex = oldIndex + 1;
+                }
               }
 
-              if (evt.key === 'ArrowDown' || evt.keyCode === 40) {
-                evt.preventDefault();
-                newIndex = oldIndex + 1;
+              if (direction === 'horizontal') {
+                if (evt.key === 'ArrowLeft' || evt.keyCode === 37) {
+                  evt.preventDefault();
+                  newIndex = oldIndex - 1;
+                }
+
+                if (evt.key === 'ArrowRight' || evt.keyCode === 39) {
+                  evt.preventDefault();
+                  newIndex = oldIndex + 1;
+                }
               }
 
               var items = getSource();
